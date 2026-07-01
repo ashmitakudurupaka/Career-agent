@@ -81,17 +81,6 @@ This is not a chatbot with Lemma bolted on. Lemma is the entire infrastructure l
 
 ---
 
-## Why This Wins
-
-**35% — Problem clarity & real-world fit:** The user is maximally specific — a final-year IIT Guwahati placement student applying to Gen AI roles in India 2026. The workflow (scattered applications → no system → late, generic, unsupported) is real and demoable because I lived it.
-
-**25% — Product judgment:** I didn't build a chatbot. I built a system where agent output lands in a typed table row, persists forever, and powers a purpose-built UI. That's exactly the Lemma thesis — and I understood it before building, not after.
-
-**25% — Execution quality:** Core loop works end-to-end. Paste JD → agent runs → five fields written back to the row. The app shows the pipeline, the scores, the drafts. Zero polish required but the workflow is real.
-
-**15% — SDK utilisation:** Tables, files, agents, workflows, functions, apps — every major Lemma primitive is used meaningfully. The `resume_context` table as an agent knowledge store is a particularly non-obvious use that shows genuine understanding of the pod model.
-
----
 
 ## File Structure
 
@@ -171,4 +160,4 @@ lemma apps deploy career-app ./pod/apps/index.html
 IBM GenAI & RAG Certified · International Research Intern, Hanyang University  
 Built solo during the Gappy AI Hackathon, June 24–July 1, 2026  
 Stack: Lemma SDK · Python · Claude (via Anthropic) · HTML/JS  
-Contact: [your email] · [LinkedIn]
+
