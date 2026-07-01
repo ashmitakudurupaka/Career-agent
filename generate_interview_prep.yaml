@@ -1,0 +1,70 @@
+name: generate_interview_prep
+display_name: "Generate Deep Interview Prep"
+description: >
+  Triggered on any application row. Reads the JD and the candidate's profile
+  and generates a full interview prep document: likely questions by category,
+  STAR-format answer frameworks using the candidate's real projects, and red flags to watch.
+
+trigger:
+  type: row_action
+  table: applications
+  action: prep_interview
+
+steps:
+  - name: fetch_context
+    type: function
+    code: |
+      from lemma_sdk import tables
+      rows = await tables.query("resume_context", limit=50)
+      context = "\n\n".join([
+          f"[{r['section']}] {r['title']}\n{r['content']}"
+          for r in rows
+      ])
+      return {"context": context}
+
+  - name: deep_prep
+    type: agent
+    agent: career_agent
+    input:
+      jd_text: "{{ trigger.row.jd_text }}"
+      company: "{{ trigger.row.company }}"
+      role: "{{ trigger.row.role }}"
+      resume_context: "{{ steps.fetch_context.context }}"
+    prompt: |
+      Generate a comprehensive interview prep guide for this role.
+
+      COMPANY: {{ company }}
+      ROLE: {{ role }}
+      JD: {{ jd_text }}
+      MY PROFILE: {{ resume_context }}
+
+      Structure your output as:
+
+      ## Technical Round Questions
+      List 6 technical questions likely for this specific JD, with a 2-sentence answer framework
+      using the candidate's actual projects.
+
+      ## Behavioural / HR Round
+      List 4 behavioural questions with STAR-format answer outlines using real examples.
+
+      ## Questions to Ask the Interviewer
+      List 3 sharp, research-based questions that signal seniority and genuine interest.
+
+      ## Watch Out For
+      2–3 likely weak spots given the candidate's profile vs this JD, and how to address them.
+
+      ## 60-Second Intro Script
+      A tight, confident self-introduction tailored to this company and role.
+
+    output_format: markdown
+
+  - name: save_prep
+    type: function
+    code: |
+      from lemma_sdk import records
+      from datetime import date
+      await records.update("applications", trigger["row"]["id"], {
+          "interview_prep_notes": steps["deep_prep"],
+          "last_action_date": date.today().isoformat()
+      })
+      return {"success": True}

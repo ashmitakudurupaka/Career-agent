@@ -1,0 +1,100 @@
+name: process_jd
+display_name: "Analyse JD & Generate All Drafts"
+description: >
+  The core loop. Triggered when a user clicks "Analyse JD" on any application row.
+  Reads the JD, fetches their full resume context, and writes back:
+  fit score, skill gaps, resume edit suggestions, recruiter message, and interview prep.
+
+trigger:
+  type: row_action
+  table: applications
+  action: analyse_jd
+
+steps:
+  - name: fetch_resume_context
+    type: function
+    description: "Load all resume context rows into a structured string for the agent"
+    code: |
+      from lemma_sdk import tables
+
+      rows = await tables.query("resume_context", limit=50)
+      sections = []
+      for row in rows:
+          sections.append(
+              f"[{row['section']}] {row['title']}\n"
+              f"{row['content']}\n"
+              f"Keywords: {row.get('keywords', '')}"
+          )
+      return {"resume_context_text": "\n\n---\n\n".join(sections)}
+
+  - name: analyse_with_agent
+    type: agent
+    agent: career_agent
+    input:
+      jd_text: "{{ trigger.row.jd_text }}"
+      company: "{{ trigger.row.company }}"
+      role: "{{ trigger.row.role }}"
+      resume_context: "{{ steps.fetch_resume_context.resume_context_text }}"
+    prompt: |
+      You are analysing a job application. Here is the full context:
+
+      COMPANY: {{ company }}
+      ROLE: {{ role }}
+
+      JOB DESCRIPTION:
+      {{ jd_text }}
+
+      CANDIDATE RESUME CONTEXT:
+      {{ resume_context }}
+
+      Perform a complete analysis and return a JSON object with exactly these keys:
+      {
+        "resume_fit_score": <number 0-10>,
+        "skill_gaps": "<bullet list of missing skills>",
+        "resume_edit_suggestions": "<specific bullet rewrites for this JD>",
+        "recruiter_message_draft": "<cold outreach email, ~150 words, uses real projects>",
+        "interview_prep_notes": "<8-12 likely questions with brief talking-point answers>"
+      }
+
+      Be specific. Use the candidate's actual project names (HumDial, Urban Waste Detection, etc.).
+      Never hallucinate skills they don't have.
+
+    output_format: json
+
+  - name: write_back_to_table
+    type: function
+    description: "Write all agent outputs back to the application row"
+    code: |
+      from lemma_sdk import tables, records
+      from datetime import date
+
+      analysis = steps["analyse_with_agent"]
+      record_id = trigger["row"]["id"]
+
+      await records.update("applications", record_id, {
+          "resume_fit_score": analysis["resume_fit_score"],
+          "skill_gaps": analysis["skill_gaps"],
+          "resume_edit_suggestions": analysis["resume_edit_suggestions"],
+          "recruiter_message_draft": analysis["recruiter_message_draft"],
+          "interview_prep_notes": analysis["interview_prep_notes"],
+          "last_action_date": date.today().isoformat(),
+          "agent_processed": True,
+          "status": trigger["row"]["status"] if trigger["row"]["status"] != "Tracking" else "Applied"
+      })
+
+      return {"success": True, "record_id": record_id}
+
+  - name: notify
+    type: function
+    description: "Surface a success message in the app"
+    code: |
+      company = trigger["row"]["company"]
+      role = trigger["row"]["role"]
+      score = steps["analyse_with_agent"]["resume_fit_score"]
+      return {
+          "message": f"✅ {company} — {role}: Fit score {score}/10. Resume edits, recruiter draft, and interview prep ready."
+      }
+
+on_error:
+  notify: true
+  message: "JD analysis failed — check that the JD text field is filled in for this row."

@@ -1,0 +1,112 @@
+name: resume_context
+display_name: "My Profile & Resume Sections"
+description: >
+  Structured store of your resume sections, project descriptions, and skills.
+  The career agent reads this table when analysing a JD so it knows exactly
+  what to match against — no hallucination, no generic advice.
+
+columns:
+  - name: section
+    type: select
+    required: true
+    display_name: "Section"
+    options:
+      - Summary
+      - Education
+      - Work Experience
+      - Project
+      - Skill
+      - Certification
+      - Achievement
+
+  - name: title
+    type: text
+    required: true
+    display_name: "Title / Name"
+    description: "e.g. 'HumDial Full-Duplex Spoken Dialogue System'"
+
+  - name: content
+    type: long_text
+    required: true
+    display_name: "Content"
+    description: "Full description, bullet points, or skill list"
+
+  - name: keywords
+    type: text
+    required: false
+    display_name: "Keywords (comma-separated)"
+    description: "Tech stack, tools, concepts covered"
+
+  - name: highlight_for_roles
+    type: text
+    required: false
+    display_name: "Best fit for roles"
+    description: "e.g. 'Gen AI Engineer, ML Research'"
+
+seed_data:
+  - section: Education
+    title: "B.Tech Data Science & AI — IIT Guwahati"
+    content: >
+      Final year student, expected graduation 2027. JEE Advanced qualified.
+      Strong foundation in machine learning, NLP, computer vision, and AI systems.
+    keywords: "IIT Guwahati, Data Science, AI, JEE Advanced"
+    highlight_for_roles: "Any ML/AI role"
+
+  - section: Project
+    title: "HumDial — Full-Duplex Spoken Dialogue System (ICASSP 2026)"
+    content: >
+      Built a true full-duplex spoken dialogue system with continuous mic input,
+      WebRTC VAD for barge-in detection, Whisper ASR for speech recognition,
+      HuBERT-SER for emotion recognition, DialoGPT-medium for response generation,
+      and SpeechT5/HiFiGAN for speech synthesis. Gradio streaming UI.
+      Competed in the ICASSP 2026 HumDial Challenge.
+    keywords: "WebRTC, VAD, Whisper, ASR, HuBERT, SER, DialoGPT, SpeechT5, HiFiGAN, Gradio, full-duplex"
+    highlight_for_roles: "Speech AI, Conversational AI, Research Engineer"
+
+  - section: Project
+    title: "Multimodal Urban Waste Detection System"
+    content: >
+      Full-stack waste detection system with FastAPI backend, Leaflet.js frontend,
+      YOLOv8 and ResNet50 for detection, DBSCAN for geo-clustering of waste hotspots,
+      OSM/OSRM for routing, and ntfy.sh for real-time alerts.
+      Deployed on Render and Hugging Face Spaces.
+    keywords: "YOLOv8, ResNet50, DBSCAN, FastAPI, Leaflet.js, OpenStreetMap, OSRM, computer vision"
+    highlight_for_roles: "Computer Vision, MLOps, Full-Stack AI"
+
+  - section: Project
+    title: "AI Job Application Command Centre (Gappy AI Hackathon)"
+    content: >
+      Agentic app built on Lemma SDK: tracks applications in a structured table,
+      parses JDs with an LLM agent, scores resume fit, suggests resume edits,
+      drafts recruiter messages, and generates interview prep notes.
+      Deployed on lemma.work.
+    keywords: "Lemma SDK, agentic, FastAPI, SQLite, Gemini, RAG, job tracker"
+    highlight_for_roles: "Gen AI Engineer, AI Product Engineer"
+
+  - section: Skill
+    title: "AI / ML Stack"
+    content: "LangChain, LangGraph, CrewAI, RAG pipelines, FAISS, Gemini API, OpenAI API, Whisper, HuBERT, YOLOv8"
+    keywords: "LangChain, LangGraph, CrewAI, RAG, FAISS, Gemini, OpenAI, Whisper, YOLOv8"
+    highlight_for_roles: "Gen AI Engineer, ML Engineer"
+
+  - section: Skill
+    title: "Engineering Stack"
+    content: "Python, FastAPI, SQLite, PostgreSQL, Docker, Gradio, Streamlit, React basics, REST APIs"
+    keywords: "Python, FastAPI, Docker, PostgreSQL, SQLite, REST"
+    highlight_for_roles: "Backend, Full-Stack, MLOps"
+
+  - section: Certification
+    title: "IBM GenAI and RAG Certification"
+    content: >
+      Certified in Generative AI fundamentals and Retrieval-Augmented Generation
+      pipelines from IBM. Covers LLM fine-tuning, vector stores, and production RAG.
+    keywords: "IBM, GenAI, RAG, certification"
+    highlight_for_roles: "Gen AI, ML Engineer"
+
+  - section: Achievement
+    title: "International Research Internship — Hanyang University"
+    content: >
+      Selected for a research internship at Hanyang University (South Korea),
+      working on AI/ML research in an international academic environment.
+    keywords: "research, international, Hanyang University"
+    highlight_for_roles: "Research Engineer, ML Research"

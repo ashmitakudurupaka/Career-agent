@@ -1,0 +1,140 @@
+name: applications
+display_name: "Job Applications"
+description: >
+  Tracks every job application — status, JD, resume fit score, recruiter
+  message draft, interview prep notes, and follow-up deadlines.
+
+columns:
+  - name: company
+    type: text
+    required: true
+    display_name: "Company"
+
+  - name: role
+    type: text
+    required: true
+    display_name: "Role Title"
+
+  - name: source
+    type: select
+    required: true
+    display_name: "Source"
+    options:
+      - LinkedIn
+      - Referral
+      - Company Portal
+      - Email
+      - Internshala
+      - AngelList
+      - Other
+
+  - name: status
+    type: select
+    required: true
+    default: "Applied"
+    display_name: "Status"
+    options:
+      - Tracking
+      - Applied
+      - OA Sent
+      - Interview Scheduled
+      - Offer
+      - Rejected
+      - Ghosted
+
+  - name: jd_text
+    type: long_text
+    required: false
+    display_name: "Job Description (paste full text)"
+
+  - name: apply_deadline
+    type: date
+    required: false
+    display_name: "Deadline"
+
+  - name: contact_name
+    type: text
+    required: false
+    display_name: "Recruiter / Referral Name"
+
+  - name: contact_email
+    type: text
+    required: false
+    display_name: "Contact Email"
+
+  - name: resume_fit_score
+    type: number
+    required: false
+    display_name: "Resume Fit Score (0–10)"
+    description: "Set by the agent after parsing the JD"
+
+  - name: skill_gaps
+    type: long_text
+    required: false
+    display_name: "Skill Gaps Identified"
+    description: "Agent-generated: skills in JD not in resume"
+
+  - name: resume_edit_suggestions
+    type: long_text
+    required: false
+    display_name: "Suggested Resume Edits"
+    description: "Agent-generated bullet rewrites tailored to this JD"
+
+  - name: recruiter_message_draft
+    type: long_text
+    required: false
+    display_name: "Recruiter Message Draft"
+    description: "Agent-generated cold outreach / referral ask"
+
+  - name: interview_prep_notes
+    type: long_text
+    required: false
+    display_name: "Interview Prep Notes"
+    description: "Agent-generated likely questions + talking points"
+
+  - name: notes
+    type: long_text
+    required: false
+    display_name: "Personal Notes"
+
+  - name: last_action_date
+    type: date
+    required: false
+    display_name: "Last Action Date"
+
+  - name: agent_processed
+    type: boolean
+    default: false
+    display_name: "Agent Processed"
+    description: "True once the career agent has run the full analysis"
+
+row_actions:
+  - name: analyse_jd
+    display_name: "Analyse JD & Generate Drafts"
+    description: "Runs the career agent on this row's JD"
+    triggers_workflow: process_jd
+
+  - name: prep_interview
+    display_name: "Generate Interview Prep"
+    description: "Generates likely questions and talking points"
+    triggers_workflow: generate_interview_prep
+
+default_sort:
+  column: apply_deadline
+  direction: asc
+
+views:
+  - name: active
+    display_name: "Active Applications"
+    filter:
+      status:
+        not_in: [Rejected, Ghosted, Offer]
+
+  - name: hot
+    display_name: "Hot (Interview Stage)"
+    filter:
+      status:
+        in: [Interview Scheduled, OA Sent]
+
+  - name: pipeline
+    display_name: "Full Pipeline"
